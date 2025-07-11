@@ -1,8 +1,8 @@
-import { config } from 'dotenv';
-import { Database } from './database';
-import { ClimateService } from './climateService';
-import { generateReducedGrid } from './gridGenerator';
-import { PointData } from './models/types';
+import {config} from 'dotenv';
+import {Database} from './database';
+import {ClimateService} from './climateService';
+import {generateReducedGrid} from './gridGenerator';
+import {GridPoint, PointData} from './models/types';
 
 // Load environment variables
 config();
@@ -11,8 +11,8 @@ config();
 const DB_URL = process.env.DATABASE_URL;
 
 if (!DB_URL) {
-  console.error('DATABASE_URL environment variable is not set');
-  process.exit(1);
+    console.error('DATABASE_URL environment variable is not set');
+    process.exit(1);
 }
 
 // Generate a grid of points covering the Earth with 5km precision
@@ -20,59 +20,62 @@ if (!DB_URL) {
 // In production, you would use the full grid with generateEarthGrid(5)
 const GRID_POINTS = generateReducedGrid(5, 1000);
 
+async function addDataForPoint(climateService: ClimateService, point: GridPoint, db: Database) {
+    const climateData = await climateService.fetchNasaData(point.lat, point.lon);
+
+    if (climateData) {
+        const climateType = climateService.determineClimateType(
+            climateData.temperature,
+            climateData.precipitation
+        );
+
+        const additionalData = await climateService.fetchAdditionalData(point);
+
+        const pointData: PointData = {
+            name: point.name,
+            lat: point.lat,
+            lon: point.lon,
+            temperature: climateData.temperature,
+            precipitation: climateData.precipitation,
+            climate_type: climateType,
+            additional_data: additionalData
+        };
+
+        await db.insertOrUpdateClimateData(pointData);
+    } else {
+        console.warn(`No climate data available for ${point.name}`);
+    }
+}
+
 /**
  * Main function to ingest climate data
  */
 async function main() {
-  console.log('Starting climate data ingestion');
-  console.log(`Processing ${GRID_POINTS.length} grid points with 5km precision`);
+    console.log('Starting climate data ingestion');
+    console.log(`Processing ${GRID_POINTS.length} grid points with 5km precision`);
 
-  const db = new Database(DB_URL);
-  const climateService = new ClimateService();
+    const db = new Database(DB_URL!);
+    const climateService = new ClimateService();
 
-  try {
-    await db.connect();
+    try {
+        await db.connect();
 
-    for (const point of GRID_POINTS) {
-      console.log(`Processing data for ${point.name}`);
+        for (let i = 0; i < GRID_POINTS.length; i++){
+            const point = GRID_POINTS[i];
+            console.log(`\t${i}\t/\t${GRID_POINTS.length}\tProcessing data for ${point.name}`);
 
-      // Fetch climate data from NASA
-      const climateData = await climateService.fetchNasaData(point.lat, point.lon);
+            if (await db.locationExists(point.name)) {
+                continue;
+            }
+            await addDataForPoint(climateService, point, db);
+        }
 
-      if (climateData) {
-        // Determine climate type
-        const climateType = climateService.determineClimateType(
-          climateData.temperature,
-          climateData.precipitation
-        );
-
-        // Fetch additional data
-        const additionalData = await climateService.fetchAdditionalData(point);
-
-        // Prepare point data for database
-        const pointData: PointData = {
-          name: point.name,
-          lat: point.lat,
-          lon: point.lon,
-          temperature: climateData.temperature,
-          precipitation: climateData.precipitation,
-          climate_type: climateType,
-          additional_data: additionalData
-        };
-
-        // Insert or update in database
-        await db.insertOrUpdateClimateData(pointData);
-      } else {
-        console.warn(`No climate data available for ${point.name}`);
-      }
+        await db.close();
+        console.log('Climate data ingestion completed successfully');
+    } catch (error) {
+        console.error('Error in climate data ingestion:', error);
+        process.exit(1);
     }
-
-    await db.close();
-    console.log('Climate data ingestion completed successfully');
-  } catch (error) {
-    console.error('Error in climate data ingestion:', error);
-    process.exit(1);
-  }
 }
 
 // Run once immediately
