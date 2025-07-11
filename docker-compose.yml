@@ -47,7 +47,10 @@ services:
       - POSTGRES_DB=worldsight
 
   data-ingestion:
-    build: ./data-ingestion
+    build:
+      context: ./data-ingestion
+      dockerfile: Dockerfile
+      no_cache: true
     volumes:
       - ./data-ingestion:/app
     depends_on:

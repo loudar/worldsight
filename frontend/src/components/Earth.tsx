@@ -87,6 +87,7 @@ function addHeatmap(climateData: ClimateData[], heatmapGeometry: THREE.SphereGeo
         }
     }
 
+    console.log(colors);
     heatmapGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
     heatmapMesh = new THREE.Mesh(heatmapGeometry, heatmapMaterial);
     scene.add(heatmapMesh);
@@ -130,7 +131,7 @@ const Earth: React.FC<EarthProps> = ({climateData, dataLayer, onLocationSelect})
         mountRef.current.appendChild(renderer.domElement);
 
         // Camera position
-        camera.position.z = 5;
+        camera.position.z = 3;
 
         // Controls
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -172,7 +173,6 @@ const Earth: React.FC<EarthProps> = ({climateData, dataLayer, onLocationSelect})
 
             const updateHeatmap = () => {
                 if (climateData && dataLayer) {
-                    // Remove existing heatmap if it exists
                     if (heatmapMesh) {
                         scene.remove(heatmapMesh);
                     }
@@ -192,14 +192,14 @@ const Earth: React.FC<EarthProps> = ({climateData, dataLayer, onLocationSelect})
             };
 
             // Update heatmap when climate data or selected layer changes
-            /*if (climateData) {
+            if (climateData) {
                 updateHeatmap();
-            }*/
+            }
+
             const animate = () => {
                 requestAnimationFrame(animate);
                 earth.rotation.y += 0.001;
                 controls.update();
-                console.log("frame");
                 renderer.render(scene, camera);
             };
 
