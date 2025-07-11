@@ -2,17 +2,16 @@
   "name": "worldsight-backend",
   "version": "1.0.0",
   "description": "Backend API for WorldSight interactive globe",
-  "main": "dist/server.js",
+  "main": "src/server.ts",
   "scripts": {
-    "start": "bun run dist/server.js",
-    "dev": "bun run --watch src/server.ts",
-    "build": "bun build src/server.ts --outdir dist"
+    "start": "bun run src/server.ts",
+    "dev": "bun run --watch src/server.ts"
   },
   "dependencies": {
     "axios": "^1.3.4",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
     "pg": "^8.10.0",
     "pg-promise": "^11.4.3"
   },

@@ -11,9 +11,33 @@ class Database {
    * Private constructor to enforce singleton pattern
    */
   private constructor() {
-    this.pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-    });
+    // Parse the connection string to ensure password is a string
+    const connectionString = process.env.DATABASE_URL;
+    let config: any = {};
+
+    if (connectionString) {
+      try {
+        const url = new URL(connectionString);
+        const userPass = url.username && url.password ? `${url.username}:${url.password}` : '';
+
+        config = {
+          user: url.username,
+          password: url.password ? String(url.password) : '', // Ensure password is a string
+          host: url.hostname,
+          port: url.port ? parseInt(url.port, 10) : 5432,
+          database: url.pathname.split('/')[1],
+          ssl: url.searchParams.get('sslmode') === 'require' ? true : false
+        };
+      } catch (error) {
+        console.error('Error parsing DATABASE_URL:', error);
+        // Fallback to using connectionString directly
+        config = { connectionString };
+      }
+    } else {
+      console.error('DATABASE_URL environment variable is not set');
+    }
+
+    this.pool = new Pool(config);
 
     // Test database connection
     this.pool.query('SELECT NOW()', (err, res) => {

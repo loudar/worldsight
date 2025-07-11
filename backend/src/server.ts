@@ -4,7 +4,9 @@ import dotenv from 'dotenv';
 import routes from './routes';
 
 // Load environment variables
-dotenv.config();
+dotenv.config({
+  quiet: true
+});
 
 // Initialize Express app
 const app = express();
