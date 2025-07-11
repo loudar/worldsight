@@ -23,11 +23,6 @@ load_dotenv()
 # Database connection parameters
 DB_URL = os.getenv('DATABASE_URL')
 
-# API endpoints and keys
-NASA_API_KEY = os.getenv('NASA_API_KEY', 'DEMO_KEY')
-NOAA_API_KEY = os.getenv('NOAA_API_KEY')
-WORLDBANK_API_URL = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country'
-
 # Generate a grid of points covering the Earth with 5km precision
 # For testing, we use a reduced grid with a maximum of 1000 points
 # In production, you would use the full grid with generate_earth_grid(5)
@@ -103,104 +98,13 @@ def determine_climate_type(temp, precip):
 def fetch_additional_data(city):
     """Fetch additional data about the city."""
     try:
-        # This is a placeholder. In a real application, you would fetch data from various APIs.
-        # For now, we'll return some static data
         return {
-            "population": get_population_estimate(city["name"]),
-            "elevation": get_elevation_estimate(city["lat"], city["lon"]),
-            "timezone": get_timezone_estimate(city["lat"], city["lon"])
+            "population": 0,
+            "elevation": 0
         }
     except Exception as e:
         logger.error(f"Error fetching additional data for {city['name']}: {e}")
         return {}
-
-def get_population_estimate(city_name):
-    """Get an estimated population for the city."""
-    # This is a placeholder with rough estimates
-    population_estimates = {
-        "New York": 8336817,
-        "London": 8982000,
-        "Tokyo": 13960000,
-        "Sydney": 5312000,
-        "Cairo": 9500000,
-        "Rio de Janeiro": 6748000,
-        "Moscow": 12500000,
-        "Mumbai": 12478447,
-        "Los Angeles": 3990000,
-        "Cape Town": 4618000,
-        "Beijing": 21540000,
-        "Berlin": 3670000,
-        "Mexico City": 9209944,
-        "Singapore": 5686000,
-        "Dubai": 3331000
-    }
-    return population_estimates.get(city_name, 1000000)  # Default to 1 million if unknown
-
-def get_elevation_estimate(lat, lon):
-    """Get an estimated elevation for the coordinates."""
-    # This is a placeholder with rough estimates
-    # In a real application, you would use an elevation API
-    elevation_estimates = {
-        (40.7128, -74.006): 10,  # New York
-        (51.5074, -0.1278): 11,  # London
-        (35.6895, 139.6917): 40,  # Tokyo
-        (-33.8688, 151.2093): 3,  # Sydney
-        (30.0444, 31.2357): 23,  # Cairo
-        (-22.9068, -43.1729): 2,  # Rio de Janeiro
-        (55.7558, 37.6173): 156,  # Moscow
-        (19.0760, 72.8777): 14,  # Mumbai
-        (34.0522, -118.2437): 93,  # Los Angeles
-        (-33.9249, 18.4241): 0,  # Cape Town
-        (39.9042, 116.4074): 44,  # Beijing
-        (52.5200, 13.4050): 34,  # Berlin
-        (19.4326, -99.1332): 2240,  # Mexico City
-        (1.3521, 103.8198): 15,  # Singapore
-        (25.2048, 55.2708): 16  # Dubai
-    }
-
-    # Find the closest match
-    closest = None
-    min_distance = float('inf')
-    for coords, elevation in elevation_estimates.items():
-        distance = ((lat - coords[0]) ** 2 + (lon - coords[1]) ** 2) ** 0.5
-        if distance < min_distance:
-            min_distance = distance
-            closest = elevation
-
-    return closest or 0  # Default to 0 if no match found
-
-def get_timezone_estimate(lat, lon):
-    """Get an estimated timezone for the coordinates."""
-    # This is a placeholder with rough estimates
-    # In a real application, you would use a timezone API
-    timezone_estimates = {
-        (40.7128, -74.006): "America/New_York",  # New York
-        (51.5074, -0.1278): "Europe/London",  # London
-        (35.6895, 139.6917): "Asia/Tokyo",  # Tokyo
-        (-33.8688, 151.2093): "Australia/Sydney",  # Sydney
-        (30.0444, 31.2357): "Africa/Cairo",  # Cairo
-        (-22.9068, -43.1729): "America/Sao_Paulo",  # Rio de Janeiro
-        (55.7558, 37.6173): "Europe/Moscow",  # Moscow
-        (19.0760, 72.8777): "Asia/Kolkata",  # Mumbai
-        (34.0522, -118.2437): "America/Los_Angeles",  # Los Angeles
-        (-33.9249, 18.4241): "Africa/Johannesburg",  # Cape Town
-        (39.9042, 116.4074): "Asia/Shanghai",  # Beijing
-        (52.5200, 13.4050): "Europe/Berlin",  # Berlin
-        (19.4326, -99.1332): "America/Mexico_City",  # Mexico City
-        (1.3521, 103.8198): "Asia/Singapore",  # Singapore
-        (25.2048, 55.2708): "Asia/Dubai"  # Dubai
-    }
-
-    # Find the closest match
-    closest = None
-    min_distance = float('inf')
-    for coords, timezone in timezone_estimates.items():
-        distance = ((lat - coords[0]) ** 2 + (lon - coords[1]) ** 2) ** 0.5
-        if distance < min_distance:
-            min_distance = distance
-            closest = timezone
-
-    return closest or "UTC"  # Default to UTC if no match found
 
 def insert_or_update_climate_data(conn, city_data):
     """Insert or update climate data in the database."""
