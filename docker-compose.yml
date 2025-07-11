@@ -48,7 +48,7 @@ services:
 
   data-ingestion:
     build:
-      context: ./data-ingestion
+      context: ./data-ingestion-ts
       dockerfile: Dockerfile
       no_cache: true
     volumes:
