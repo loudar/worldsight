@@ -44,3 +44,21 @@ export interface InfoPanelProps {
   selectedLocation: LocationDetails | null;
   onClose: () => void;
 }
+
+/**
+ * Pagination metadata
+ */
+export interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  total: number;
+}
+
+/**
+ * Paginated response type
+ */
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: PaginationMeta;
+}

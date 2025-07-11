@@ -8,6 +8,7 @@ import psycopg2
 import pandas as pd
 from dotenv import load_dotenv
 from datetime import datetime
+from grid_generator import generate_reduced_grid
 
 # Configure logging
 logging.basicConfig(
@@ -27,24 +28,10 @@ NASA_API_KEY = os.getenv('NASA_API_KEY', 'DEMO_KEY')
 NOAA_API_KEY = os.getenv('NOAA_API_KEY')
 WORLDBANK_API_URL = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country'
 
-# List of major cities with their coordinates
-CITIES = [
-    {"name": "New York", "lat": 40.7128, "lon": -74.006, "country_code": "USA"},
-    {"name": "London", "lat": 51.5074, "lon": -0.1278, "country_code": "GBR"},
-    {"name": "Tokyo", "lat": 35.6895, "lon": 139.6917, "country_code": "JPN"},
-    {"name": "Sydney", "lat": -33.8688, "lon": 151.2093, "country_code": "AUS"},
-    {"name": "Cairo", "lat": 30.0444, "lon": 31.2357, "country_code": "EGY"},
-    {"name": "Rio de Janeiro", "lat": -22.9068, "lon": -43.1729, "country_code": "BRA"},
-    {"name": "Moscow", "lat": 55.7558, "lon": 37.6173, "country_code": "RUS"},
-    {"name": "Mumbai", "lat": 19.0760, "lon": 72.8777, "country_code": "IND"},
-    {"name": "Los Angeles", "lat": 34.0522, "lon": -118.2437, "country_code": "USA"},
-    {"name": "Cape Town", "lat": -33.9249, "lon": 18.4241, "country_code": "ZAF"},
-    {"name": "Beijing", "lat": 39.9042, "lon": 116.4074, "country_code": "CHN"},
-    {"name": "Berlin", "lat": 52.5200, "lon": 13.4050, "country_code": "DEU"},
-    {"name": "Mexico City", "lat": 19.4326, "lon": -99.1332, "country_code": "MEX"},
-    {"name": "Singapore", "lat": 1.3521, "lon": 103.8198, "country_code": "SGP"},
-    {"name": "Dubai", "lat": 25.2048, "lon": 55.2708, "country_code": "ARE"}
-]
+# Generate a grid of points covering the Earth with 5km precision
+# For testing, we use a reduced grid with a maximum of 1000 points
+# In production, you would use the full grid with generate_earth_grid(5)
+GRID_POINTS = generate_reduced_grid(precision_km=5, max_points=1000)
 
 def connect_to_db():
     """Establish a connection to the PostgreSQL database."""
@@ -63,20 +50,20 @@ def fetch_nasa_data(lat, lon):
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
-        
+
         # Extract average temperature and precipitation
         if 'properties' in data and 'parameter' in data['properties']:
             params = data['properties']['parameter']
             temp_data = params.get('T2M', {})
             precip_data = params.get('PRECTOTCORR', {})
-            
+
             # Calculate averages
             temp_values = [v for k, v in temp_data.items() if isinstance(v, (int, float))]
             precip_values = [v for k, v in precip_data.items() if isinstance(v, (int, float))]
-            
+
             avg_temp = sum(temp_values) / len(temp_values) if temp_values else None
             avg_precip = sum(precip_values) * 365 if precip_values else None  # Annual precipitation
-            
+
             return {
                 "temperature": avg_temp,
                 "precipitation": avg_precip
@@ -90,7 +77,7 @@ def determine_climate_type(temp, precip):
     """Determine the climate type based on temperature and precipitation."""
     if temp is None or precip is None:
         return "Unknown"
-    
+
     if temp > 18:
         if precip < 500:
             return "Hot desert"
@@ -170,7 +157,7 @@ def get_elevation_estimate(lat, lon):
         (1.3521, 103.8198): 15,  # Singapore
         (25.2048, 55.2708): 16  # Dubai
     }
-    
+
     # Find the closest match
     closest = None
     min_distance = float('inf')
@@ -179,7 +166,7 @@ def get_elevation_estimate(lat, lon):
         if distance < min_distance:
             min_distance = distance
             closest = elevation
-    
+
     return closest or 0  # Default to 0 if no match found
 
 def get_timezone_estimate(lat, lon):
@@ -203,7 +190,7 @@ def get_timezone_estimate(lat, lon):
         (1.3521, 103.8198): "Asia/Singapore",  # Singapore
         (25.2048, 55.2708): "Asia/Dubai"  # Dubai
     }
-    
+
     # Find the closest match
     closest = None
     min_distance = float('inf')
@@ -212,21 +199,21 @@ def get_timezone_estimate(lat, lon):
         if distance < min_distance:
             min_distance = distance
             closest = timezone
-    
+
     return closest or "UTC"  # Default to UTC if no match found
 
 def insert_or_update_climate_data(conn, city_data):
     """Insert or update climate data in the database."""
     try:
         cursor = conn.cursor()
-        
+
         # Check if the city already exists
         cursor.execute(
             "SELECT id FROM climate_data WHERE location_name = %s",
             (city_data["name"],)
         )
         result = cursor.fetchone()
-        
+
         if result:
             # Update existing record
             cursor.execute(
@@ -270,7 +257,7 @@ def insert_or_update_climate_data(conn, city_data):
                 )
             )
             logger.info(f"Inserted climate data for {city_data['name']}")
-        
+
         conn.commit()
     except Exception as e:
         conn.rollback()
@@ -279,42 +266,43 @@ def insert_or_update_climate_data(conn, city_data):
 def main():
     """Main function to ingest climate data."""
     logger.info("Starting climate data ingestion")
-    
+    logger.info(f"Processing {len(GRID_POINTS)} grid points with 5km precision")
+
     try:
         conn = connect_to_db()
-        
-        for city in CITIES:
-            logger.info(f"Processing data for {city['name']}")
-            
+
+        for point in GRID_POINTS:
+            logger.info(f"Processing data for {point['name']}")
+
             # Fetch climate data from NASA
-            climate_data = fetch_nasa_data(city["lat"], city["lon"])
-            
+            climate_data = fetch_nasa_data(point["lat"], point["lon"])
+
             if climate_data:
                 # Determine climate type
                 climate_type = determine_climate_type(
                     climate_data["temperature"],
                     climate_data["precipitation"]
                 )
-                
+
                 # Fetch additional data
-                additional_data = fetch_additional_data(city)
-                
-                # Prepare city data for database
-                city_data = {
-                    "name": city["name"],
-                    "lat": city["lat"],
-                    "lon": city["lon"],
+                additional_data = fetch_additional_data(point)
+
+                # Prepare point data for database
+                point_data = {
+                    "name": point["name"],
+                    "lat": point["lat"],
+                    "lon": point["lon"],
                     "temperature": climate_data["temperature"],
                     "precipitation": climate_data["precipitation"],
                     "climate_type": climate_type,
                     "additional_data": additional_data
                 }
-                
+
                 # Insert or update in database
-                insert_or_update_climate_data(conn, city_data)
+                insert_or_update_climate_data(conn, point_data)
             else:
-                logger.warning(f"No climate data available for {city['name']}")
-        
+                logger.warning(f"No climate data available for {point['name']}")
+
         conn.close()
         logger.info("Climate data ingestion completed successfully")
     except Exception as e:
@@ -323,7 +311,7 @@ def main():
 if __name__ == "__main__":
     # Run once immediately
     main()
-    
+
     # Then run periodically (e.g., once a day)
     while True:
         # Sleep for 24 hours (in seconds)

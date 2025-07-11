@@ -8,6 +8,7 @@ const router = Router();
 // Climate data routes
 router.get('/climate-data', ClimateController.getAllClimateData);
 router.get('/locations/:id', ClimateController.getLocationById);
+router.get('/climate-data/coordinates', ClimateController.getClimateDataByCoordinates);
 
 // Health check route
 router.get('/health', HealthController.getHealth);
