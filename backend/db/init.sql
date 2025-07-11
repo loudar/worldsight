@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS climate_data (
   location_name VARCHAR(255) NOT NULL,
   location GEOGRAPHY(POINT, 4326) NOT NULL,
   temperature NUMERIC(5, 2),
-  precipitation NUMERIC(8, 2),
+  precipitation NUMERIC(10, 2),
   climate_type VARCHAR(100),
   additional_data JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

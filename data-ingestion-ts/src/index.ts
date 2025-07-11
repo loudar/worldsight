@@ -1,7 +1,7 @@
 import {config} from 'dotenv';
 import {Database} from './database';
 import {ClimateService} from './climateService';
-import {generateReducedGrid} from './gridGenerator';
+import {generateEarthGrid, generateReducedGrid} from './gridGenerator';
 import {GridPoint, PointData} from './models/types';
 
 // Load environment variables
@@ -18,7 +18,8 @@ if (!DB_URL) {
 // Generate a grid of points covering the Earth with 5km precision
 // For testing, we use a reduced grid with a maximum of 1000 points
 // In production, you would use the full grid with generateEarthGrid(5)
-const GRID_POINTS = generateReducedGrid(5, 1000);
+//const GRID_POINTS = generateReducedGrid(5, 1000);
+const GRID_POINTS = generateEarthGrid(5);
 
 async function addDataForPoint(climateService: ClimateService, point: GridPoint, db: Database) {
     const climateData = await climateService.fetchNasaData(point.lat, point.lon);
@@ -62,7 +63,7 @@ async function main() {
 
         for (let i = 0; i < GRID_POINTS.length; i++){
             const point = GRID_POINTS[i];
-            console.log(`\t${i}\t/\t${GRID_POINTS.length}\tProcessing data for ${point.name}`);
+            console.log(`\t${i + 1}\t/\t${GRID_POINTS.length}\tProcessing data for ${point.name}`);
 
             if (await db.locationExists(point.name)) {
                 continue;
@@ -82,4 +83,4 @@ async function main() {
 main();
 
 // Then run periodically (e.g., once a day)
-setInterval(main, 24 * 60 * 60 * 1000);
+//setInterval(main, 24 * 60 * 60 * 1000);

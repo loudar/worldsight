@@ -8,6 +8,7 @@ function addHeatmap(climateData: ClimateData[], heatmapGeometry: THREE.SphereGeo
     // Create a map of positions to climate data
     const dataMap = new Map();
 
+    console.log(climateData);
     if (climateData) {
         climateData.forEach(point => {
             const lon = point.geometry.coordinates[0];
@@ -178,7 +179,7 @@ const Earth: React.FC<EarthProps> = ({climateData, dataLayer, onLocationSelect})
                     }
 
                     // Create a new heatmap based on the selected data layer
-                    const heatmapGeometry = new THREE.SphereGeometry(2.01, 64, 64);
+                    const heatmapGeometry = new THREE.SphereGeometry(1.01, 64, 64);
                     const heatmapMaterial = new THREE.MeshBasicMaterial({
                         transparent: true,
                         opacity: 0.6,
@@ -194,11 +195,16 @@ const Earth: React.FC<EarthProps> = ({climateData, dataLayer, onLocationSelect})
             // Update heatmap when climate data or selected layer changes
             if (climateData) {
                 updateHeatmap();
+            } else {
+                console.log(climateData);
             }
 
             const animate = () => {
                 requestAnimationFrame(animate);
                 earth.rotation.y += 0.001;
+                if (heatmapMesh) {
+                    heatmapMesh.rotation.y += 0.001;
+                }
                 controls.update();
                 renderer.render(scene, camera);
             };
