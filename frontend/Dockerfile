@@ -1,13 +1,14 @@
-FROM node:16-alpine
+FROM oven/bun:latest
 
 WORKDIR /app
 
 COPY package*.json ./
+COPY tsconfig.json ./
 
-RUN npm install
+RUN bun install
 
 COPY . .
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["bun", "run", "start"]

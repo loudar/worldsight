@@ -1,31 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import axios from 'axios';
-import './App.css';
+import { EarthProps } from '../types';
 
-function App() {
-  const mountRef = useRef(null);
-  const [loading, setLoading] = useState(true);
-  const [climateData, setClimateData] = useState(null);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [dataLayer, setDataLayer] = useState('temperature'); // Options: temperature, precipitation, etc.
-
-  useEffect(() => {
-    // Fetch climate data from our API
-    const fetchClimateData = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/climate-data`);
-        setClimateData(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching climate data:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchClimateData();
-  }, []);
+/**
+ * Earth component for 3D globe visualization
+ */
+const Earth: React.FC<EarthProps> = ({ climateData, dataLayer, onLocationSelect }) => {
+  const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -79,7 +61,7 @@ function App() {
     scene.add(sunLight);
 
     // Climate data visualization layer
-    let heatmapMesh;
+    let heatmapMesh: THREE.Mesh | null = null;
 
     const updateHeatmap = () => {
       if (climateData && dataLayer) {
@@ -97,7 +79,7 @@ function App() {
         });
 
         // Apply colors based on climate data
-        const colors = [];
+        const colors: number[] = [];
 
         // This is a simplified example - in a real app, you'd map the actual data points
         // to the vertices of the sphere geometry
@@ -158,7 +140,9 @@ function App() {
     // Cleanup function
     return () => {
       window.removeEventListener('resize', handleResize);
-      mountRef.current.removeChild(renderer.domElement);
+      if (mountRef.current) {
+        mountRef.current.removeChild(renderer.domElement);
+      }
       scene.remove(earth);
       earthGeometry.dispose();
       earthMaterial.dispose();
@@ -166,39 +150,7 @@ function App() {
     };
   }, [climateData, dataLayer]);
 
-  const handleLayerChange = (e) => {
-    setDataLayer(e.target.value);
-  };
+  return <div ref={mountRef} className="globe-container" />;
+};
 
-  return (
-    <div className="App">
-      {loading ? (
-        <div className="loading">Loading climate data...</div>
-      ) : (
-        <>
-          <div className="controls">
-            <h3>Data Layer</h3>
-            <select value={dataLayer} onChange={handleLayerChange}>
-              <option value="temperature">Temperature</option>
-              <option value="precipitation">Precipitation</option>
-            </select>
-          </div>
-
-          {selectedLocation && (
-            <div className="info-panel">
-              <h3>{selectedLocation.name}</h3>
-              <p>Temperature: {selectedLocation.temperature}°C</p>
-              <p>Precipitation: {selectedLocation.precipitation} mm</p>
-              <p>Climate: {selectedLocation.climate}</p>
-              <button onClick={() => setSelectedLocation(null)}>Close</button>
-            </div>
-          )}
-
-          <div ref={mountRef} className="globe-container" />
-        </>
-      )}
-    </div>
-  );
-}
-
-export default App;
+export default Earth;

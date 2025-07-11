@@ -1,0 +1,3 @@
+- Always use bun instead of npm or node
+- Always use Typescript instead of JS
+- Always cleanly separate code into methods and classes in separate files

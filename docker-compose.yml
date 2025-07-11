@@ -11,6 +11,7 @@ services:
     environment:
       - NODE_ENV=development
       - REACT_APP_API_URL=http://localhost:5000/api
+      - BUN_INSTALL=true
 
   backend:
     build: ./backend
@@ -18,12 +19,14 @@ services:
       - "5000:5000"
     volumes:
       - ./backend:/app
+      - /app/node_modules
     depends_on:
       - postgres
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/worldsight
       - PORT=5000
+      - BUN_INSTALL=true
 
   postgres:
     image: postgis/postgis:14-3.3
