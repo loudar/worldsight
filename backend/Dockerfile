@@ -1,4 +1,4 @@
-FROM oven/bun:latest
+FROM oven/bun:1 AS base
 
 WORKDIR /app
 
@@ -9,9 +9,8 @@ RUN bun install
 
 COPY . .
 
-# Build TypeScript
-RUN bun run build
-
 EXPOSE 5000
+
+RUN ls
 
 CMD ["bun", "run", "start"]
