@@ -15,12 +15,12 @@ const createDot = (): THREE.Mesh => {
 };
 
 function addLights(scene: Scene) {
-    const ambientLight = new THREE.AmbientLight(0x333333);
+    const ambientLight = new THREE.AmbientLight(0xffffff);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+    /*const sunLight = new THREE.DirectionalLight(0xffffff, 1);
     sunLight.position.set(5, 3, 5);
-    scene.add(sunLight);
+    scene.add(sunLight);*/
 }
 
 /**
@@ -130,6 +130,7 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
                     dot.position.copy(position);
 
                     const {lat, lng} = positionToLatLng(position);
+                    console.log(lat, lng);
                     if (setLoading) {
                         setLoading(true);
                     }

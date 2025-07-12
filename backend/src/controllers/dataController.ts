@@ -22,6 +22,6 @@ export class DataController {
             res.status(400).json({error: 'Invalid coordinates. Please provide valid coordinates.'});
         }
 
-        console.log(geocode.display_name);
+        res.send(geocode.display_name);
     }
 }
