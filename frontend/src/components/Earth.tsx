@@ -137,7 +137,7 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
                     const intersection = intersects[0];
                     const position = intersection.point;
 
-                    const { lat, lng } = positionToLatLng(position);
+                    const {lat, lng} = positionToLatLng(position);
                     if (setLoading) {
                         setLoading(true);
                     }
