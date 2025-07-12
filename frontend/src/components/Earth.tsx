@@ -1,10 +1,18 @@
 import React, {useEffect, useRef, useState} from 'react';
 import * as THREE from 'three';
+import {Mesh, MeshBasicMaterial, Scene, SphereGeometry} from 'three';
 import {EarthProps} from '../types';
 import {loadTexture} from "../textureLoader";
 import {getOrbitControls} from "./GetOrbitControls";
-import {Scene} from "three";
 import {DataService} from "../services/dataService";
+import {positionToLatLng} from "./PositionToLatLng";
+
+const createDot = (): THREE.Mesh => {
+    const size = 0.01;
+    const geometry = new SphereGeometry(size, 32, 32);
+    const material = new MeshBasicMaterial({color: 0xff0000});
+    return new Mesh(geometry, material);
+};
 
 function addLights(scene: Scene) {
     const ambientLight = new THREE.AmbientLight(0x333333);
@@ -16,31 +24,12 @@ function addLights(scene: Scene) {
 }
 
 /**
- * Convert 3D position to latitude and longitude
- */
-function positionToLatLng(position: THREE.Vector3): { lat: number, lng: number } {
-    // Normalize the position vector to get a point on the sphere
-    const normalized = position.clone().normalize();
-
-    // Calculate latitude and longitude in radians
-    // Latitude: angle from XZ plane to Y axis (-π/2 to π/2)
-    // Longitude: angle around Y axis (0 to 2π)
-    const lat = Math.asin(normalized.y);
-    const lng = Math.atan2(normalized.x, normalized.z);
-
-    // Convert to degrees
-    return {
-        lat: lat * (180 / Math.PI),
-        lng: lng * (180 / Math.PI)
-    };
-}
-
-/**
  * Earth component for 3D globe visualization
  */
 const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, searchRadius = 10}) => {
-    const mountRef = useRef<HTMLDivElement>(null);
     const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+
+    const mountRef = useRef<HTMLDivElement>(null);
     const sceneRef = useRef<THREE.Scene | null>(null);
     const earthRef = useRef<THREE.Object3D | null>(null);
     const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
@@ -120,11 +109,12 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
 
             animate();
         });
+        const dot = createDot();
+        scene.add(dot);
 
-        // Handle click events
+        // Modify the handleClick function inside useEffect:
         const handleClick = (event: MouseEvent) => {
             console.log("click");
-            // Calculate mouse position in normalized device coordinates (-1 to +1)
             mouseRef.current.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouseRef.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -136,6 +126,8 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
                 if (intersects.length > 0) {
                     const intersection = intersects[0];
                     const position = intersection.point;
+
+                    dot.position.copy(position);
 
                     const {lat, lng} = positionToLatLng(position);
                     if (setLoading) {
