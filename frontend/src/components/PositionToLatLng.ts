@@ -7,12 +7,31 @@ import * as THREE from "three";
  * accounting for the Earth's rotation.
  * 
  * @param position The 3D position on the sphere
+ * @param earthLOD The Earth LOD object to account for its rotation
  * @param sphereRadius The radius of the sphere (default: 1)
  * @returns An object containing the latitude and longitude in degrees
  */
-export function positionToLatLng(position: THREE.Vector3, sphereRadius: number = 1): { lat: number, lng: number } {
+export function positionToLatLng(
+    position: THREE.Vector3, 
+    earthLOD?: THREE.Object3D | null, 
+    sphereRadius: number = 1
+): { lat: number, lng: number } {
+    // Create a copy of the position to avoid modifying the original
+    let adjustedPosition = position.clone();
+
+    // If earthLOD is provided, adjust the position to account for its rotation
+    if (earthLOD) {
+        // Create a matrix that represents the inverse of the earth's rotation
+        const inverseRotationMatrix = new THREE.Matrix4().makeRotationFromEuler(
+            new THREE.Euler(-earthLOD.rotation.x, -earthLOD.rotation.y, -earthLOD.rotation.z, earthLOD.rotation.order)
+        ).makeRotationY(Math.PI * 1.5);
+
+        // Apply the inverse rotation to the position
+        adjustedPosition.applyMatrix4(inverseRotationMatrix);
+    }
+
     // Normalize the position vector to ensure it's on the sphere surface
-    const normalizedPosition = position.clone().normalize().multiplyScalar(sphereRadius);
+    const normalizedPosition = adjustedPosition.normalize().multiplyScalar(sphereRadius);
 
     console.log(position, normalizedPosition);
 

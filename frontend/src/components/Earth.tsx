@@ -132,7 +132,7 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
 
                     dot.position.copy(position);
 
-                    const {lat, lng} = positionToLatLng(position);
+                    const {lat, lng} = positionToLatLng(position, earthRef.current);
                     console.log(lat, lng);
                     if (setLoading) {
                         setLoading(true);
