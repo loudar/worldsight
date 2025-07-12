@@ -1,0 +1,15 @@
+{
+  "lockfileVersion": 1,
+  "workspaces": {
+    "": {
+      "dependencies": {
+        "geo-three": "^0.1.15",
+      },
+    },
+  },
+  "packages": {
+    "geo-three": ["geo-three@0.1.15", "", { "peerDependencies": { "three": ">0.120.0" } }, "sha512-mU5K5QfnRwOawTjXg1zmAMTu+c/uC6cZFNGYqf41eCRXfX4bkDHFaPhXa08z1WjYzg5kq1BSjpFR9weW2vNJZg=="],
+
+    "three": ["three@0.178.0", "", {}, "sha512-ybFIB0+x8mz0wnZgSGy2MO/WCO6xZhQSZnmfytSPyNpM0sBafGRVhdaj+erYh5U+RhQOAg/eXqw5uVDiM2BjhQ=="],
+  }
+}

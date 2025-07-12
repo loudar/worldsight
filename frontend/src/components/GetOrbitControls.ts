@@ -5,7 +5,7 @@ export function getOrbitControls(camera: PerspectiveCamera, renderer: WebGLRende
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.minDistance = 3;
+    controls.minDistance = 1.1;
     controls.maxDistance = 10;
     return controls;
 }

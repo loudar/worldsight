@@ -1,34 +1,13 @@
 import React from "react";
 
 /**
- * Climate data type
- */
-export interface ClimateData {
-    id: number;
-    location_name: string;
-    geometry: {
-        type: string;
-        coordinates: number[];
-    };
-    temperature: number;
-    precipitation: number;
-    climate_type: string;
-}
-
-/**
- * Location details type (extends ClimateData with additional data)
- */
-export interface LocationDetails extends ClimateData {
-    additional_data?: Record<string, any>;
-}
-
-/**
  * Props for the Earth component
  */
 export interface EarthProps {
     dataLayer: string,
     setLoading?: (value: (((prevState: boolean) => boolean) | boolean)) => void,
-    setLocationInfo?: (value: (((prevState: string) => string) | string)) => void
+    setLocationInfo?: (value: (((prevState: string) => string) | string)) => void,
+    searchRadius?: number
 }
 
 /**
