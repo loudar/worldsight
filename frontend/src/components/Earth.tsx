@@ -57,7 +57,7 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
         earthRef.current = earthLOD;
 
         Promise.all([
-            loadTexture('https://unpkg.com/three-globe@2.24.10/example/img/earth-blue-marble.jpg'),
+            loadTexture(`${window.location.origin}/8081_earthmap10k.jpg`),
             loadTexture('https://unpkg.com/three-globe@2.24.10/example/img/earth-topology.png'),
             loadTexture('https://unpkg.com/three-globe@2.24.10/example/img/earth-water.png')
         ]).then(([mapTexture, bumpTexture, specularTexture]) => {

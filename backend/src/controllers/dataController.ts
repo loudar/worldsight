@@ -40,8 +40,8 @@ export class DataController {
             const historicData = events.map(e => {
                 return <HistoricData>{
                     title: e.title,
-                    extract: e.primary,
-                    url: e.type
+                    extract: e.type,
+                    url: `https://en.wikipedia.org/?curid=${e.pageid}`
                 }
             });
 

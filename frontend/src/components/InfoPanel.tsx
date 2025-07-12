@@ -33,7 +33,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({loading, locationInfo}) => {
                             <article key={index}>
                                 <h2>{entry.title}</h2>
                                 <span>{entry.extract}</span>
-                                <span>{entry.url}</span>
+                                <a href={entry.url} target="_blank">{entry.url}</a>
                             </article>
                         )
                     })}
