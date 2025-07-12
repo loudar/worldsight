@@ -34,7 +34,7 @@ export class NewsService {
                     q: location,
                     apiKey: this.apiKey,
                     language: 'en',
-                    sortBy: 'publishedAt',
+                    sortBy: 'popularity',
                     pageSize: limit
                 },
                 headers: {
@@ -43,6 +43,7 @@ export class NewsService {
             });
 
             if (response.data && response.data.articles) {
+                console.info(`${response.data.totalResults} articles found`);
                 return response.data.articles.map((article: any) => ({
                     title: article.title,
                     description: article.description,

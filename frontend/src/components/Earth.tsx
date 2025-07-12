@@ -23,7 +23,7 @@ let added = false;
 /**
  * Earth component for 3D globe visualization
  */
-const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading}) => {
+const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
     const mountRef = useRef<HTMLDivElement>(null);
     const sceneRef = useRef<THREE.Scene | null>(null);
     const earthRef = useRef<THREE.Object3D | null>(null);
@@ -177,7 +177,7 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading}) =
             }
             renderer.dispose();
         };
-    }, [dataLayer, setLoading, setLocationInfo]);
+    }, [setLoading, setLocationInfo]);
 
     return <div ref={mountRef} className="globe-container"/>;
 };

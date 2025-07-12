@@ -1,8 +1,12 @@
 import {Request, Response} from 'express';
-import {OSMGeocoder} from "../OSMGeocoder";
+import {OSMGeocoder, OSMReverseGeocodeResponse} from "../OSMGeocoder";
 import {NewsService} from "../services/NewsService";
 import {HistoricDataService} from "../services/HistoricDataService";
 import {LocationResponse} from "../types/responses";
+
+function getSearchName(geocode: OSMReverseGeocodeResponse) {
+    return `${geocode.address.city}, ${geocode.address.country}`;
+}
 
 export class DataController {
     public static async getDataByLatLon(req: Request, res: Response) {
@@ -23,7 +27,7 @@ export class DataController {
                 return;
             }
 
-            const locationName = geocode.display_name;
+            const locationName = getSearchName(geocode);
 
             // Get news about the location
             const newsService = new NewsService();

@@ -12,14 +12,21 @@ const InfoPanel: React.FC<InfoPanelProps> = ({loading, locationInfo}) => {
     return (
         <div className="info-panel">{
             loading ? (<p>Loading...</p>) : <div>
-                {(locationInfo.data?.news ?? []).map((article, index) => {
-                    return (
-                        <p key={index}>{article.title}</p>
-                    )
-                })}
-                <p>{locationInfo.position?.lat}</p>
-                <p>{locationInfo.position?.lng}</p>
-                <p>{locationInfo.data?.location.name}</p>
+                <h1>{locationInfo.data?.location.name}</h1>
+                <div className="flex spaced mono">
+                    <p>LAT {locationInfo.position?.lat.toFixed(2)}</p>
+                    <p>LON {locationInfo.position?.lng.toFixed(2)}</p>
+                </div>
+                <div className="flex-v spaced">
+                    {(locationInfo.data?.news ?? []).map((article, index) => {
+                        return (
+                            <article key={index}>
+                                <h2>{article.title}</h2>
+                                <a href={article.url} target="_blank">{article.source}</a>
+                            </article>
+                        )
+                    })}
+                </div>
             </div>
         }</div>
     );

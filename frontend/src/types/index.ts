@@ -2,7 +2,6 @@ import React from "react";
 import {LocationResponse} from "./responses";
 
 export interface EarthProps {
-    dataLayer: string,
     setLoading?: (value: (((prevState: boolean) => boolean) | boolean)) => void,
     setLocationInfo?: (value: (((prevState: LocationInfo) => LocationInfo) | LocationInfo)) => void,
 }
