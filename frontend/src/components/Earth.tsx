@@ -7,8 +7,7 @@ import {getOrbitControls} from "./GetOrbitControls";
 import {DataService} from "../services/dataService";
 import {positionToLatLng} from "./PositionToLatLng";
 
-const createDot = (): THREE.Mesh => {
-    const size = 0.01;
+const createDot = (size: number): THREE.Mesh => {
     const geometry = new SphereGeometry(size, 32, 32);
     const material = new MeshBasicMaterial({color: 0xff0000});
     return new Mesh(geometry, material);
@@ -17,18 +16,14 @@ const createDot = (): THREE.Mesh => {
 function addLights(scene: Scene) {
     const ambientLight = new THREE.AmbientLight(0xffffff);
     scene.add(ambientLight);
-
-    /*const sunLight = new THREE.DirectionalLight(0xffffff, 1);
-    sunLight.position.set(5, 3, 5);
-    scene.add(sunLight);*/
 }
+
+let added = false;
 
 /**
  * Earth component for 3D globe visualization
  */
-const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, searchRadius = 10}) => {
-    const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-
+const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading}) => {
     const mountRef = useRef<HTMLDivElement>(null);
     const sceneRef = useRef<THREE.Scene | null>(null);
     const earthRef = useRef<THREE.Object3D | null>(null);
@@ -49,14 +44,14 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
         sceneRef.current = scene;
         const renderer = new THREE.WebGLRenderer({antialias: true});
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
         camera.position.z = 3;
 
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         mountRef.current.appendChild(renderer.domElement);
 
-        //const controls = getOrbitControls(camera, renderer);
+        const controls = getOrbitControls(camera, renderer);
 
         const earthLOD = new THREE.LOD();
         earthRef.current = earthLOD;
@@ -103,21 +98,17 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
             const animate = () => {
                 requestAnimationFrame(animate);
                 //earthLOD.rotation.y += 0.001;
-                //controls.update();
+                controls.update();
                 renderer.render(scene, camera);
             };
 
             animate();
         });
-        const dot = createDot();
+        let dot = createDot(0);
         scene.add(dot);
-        const zeroDot = createDot();
-        zeroDot.position.set(0, 0, 0);
-        scene.add(zeroDot);
 
         // Modify the handleClick function inside useEffect:
         const handleClick = (event: MouseEvent) => {
-            console.log("click");
             mouseRef.current.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouseRef.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -130,26 +121,25 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
                     const intersection = intersects[0];
                     const position = intersection.point;
 
+                    scene.remove(dot);
+                    const newScale = 0.005 * (controls.getDistance() / 3);
+                    dot = createDot(newScale);
                     dot.position.copy(position);
+                    scene.add(dot);
 
                     const {lat, lng} = positionToLatLng(position, earthRef.current);
-                    console.log(lat, lng);
                     if (setLoading) {
                         setLoading(true);
                     }
 
-                    console.log(lat, lng);
                     DataService.getDataByLatLon(lat, lng)
                         .then(locationData => {
-                            setSelectedLocation(locationData);
-
-                            const infoText = `
-                                Data: ${locationData}
-                                Search Radius: ${searchRadius} km
-                            `;
-
                             if (setLocationInfo) {
-                                setLocationInfo(infoText);
+                                setLocationInfo({
+                                    position: {lat, lng},
+                                    name: `${locationData}`,
+                                    news: ["test news", "yeah man"]
+                                });
                             }
 
                             if (setLoading) {
@@ -159,7 +149,9 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
                         .catch(error => {
                             console.error("Error fetching location data:", error);
                             if (setLocationInfo) {
-                                setLocationInfo(`Error loading data for coordinates: ${lat.toFixed(2)}°, ${lng.toFixed(2)}°`);
+                                setLocationInfo({
+                                    name: `Error loading data for coordinates: ${lat.toFixed(2)}°, ${lng.toFixed(2)}°`
+                                });
                             }
                             if (setLoading) {
                                 setLoading(false);
@@ -175,19 +167,23 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
             renderer.setSize(window.innerWidth, window.innerHeight);
         };
         window.addEventListener('resize', handleResize);
-        mountRef.current.addEventListener('click', handleClick);
-        console.log("added listeners");
+        if (mountRef.current && !added) {
+            added = true;
+            mountRef.current.addEventListener('click', handleClick);
+        }
 
         return () => {
             console.log("cleanup");
             window.removeEventListener('resize', handleResize);
+
             if (mountRef.current) {
-                mountRef.current.removeEventListener('click', handleClick);
                 mountRef.current.removeChild(renderer.domElement);
+                mountRef.current.removeEventListener('click', handleClick);
+                added = false;
             }
             renderer.dispose();
         };
-    }, [dataLayer, searchRadius, setLoading, setLocationInfo]);
+    }, [dataLayer, setLoading, setLocationInfo]);
 
     return <div ref={mountRef} className="globe-container"/>;
 };

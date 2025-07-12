@@ -11,7 +11,16 @@ const InfoPanel: React.FC<InfoPanelProps> = ({loading, locationInfo}) => {
 
     return (
         <div className="info-panel">{
-            loading ? (<p>Loading...</p>) : <p>{locationInfo}</p>
+            loading ? (<p>Loading...</p>) : <div>
+                {(locationInfo.news ?? []).map((item) => {
+                    return (
+                        <p>{item}</p>
+                    )
+                })}
+                <p>{locationInfo.position?.lat}</p>
+                <p>{locationInfo.position?.lng}</p>
+                <p>{locationInfo.name}</p>
+            </div>
         }</div>
     );
 };

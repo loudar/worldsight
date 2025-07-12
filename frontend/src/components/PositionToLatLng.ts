@@ -33,8 +33,6 @@ export function positionToLatLng(
     // Normalize the position vector to ensure it's on the sphere surface
     const normalizedPosition = adjustedPosition.normalize().multiplyScalar(sphereRadius);
 
-    console.log(position, normalizedPosition);
-
     // Calculate latitude using arcsin(y / radius)
     // This gives latitude in the range [-90°, 90°] where:
     // - 90° is the north pole (positive y-axis)
