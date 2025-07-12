@@ -56,7 +56,7 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
         renderer.setPixelRatio(window.devicePixelRatio);
         mountRef.current.appendChild(renderer.domElement);
 
-        const controls = getOrbitControls(camera, renderer);
+        //const controls = getOrbitControls(camera, renderer);
 
         const earthLOD = new THREE.LOD();
         earthRef.current = earthLOD;
@@ -103,7 +103,7 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
             const animate = () => {
                 requestAnimationFrame(animate);
                 //earthLOD.rotation.y += 0.001;
-                controls.update();
+                //controls.update();
                 renderer.render(scene, camera);
             };
 
@@ -111,6 +111,9 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading, se
         });
         const dot = createDot();
         scene.add(dot);
+        const zeroDot = createDot();
+        zeroDot.position.set(0, 0, 0);
+        scene.add(zeroDot);
 
         // Modify the handleClick function inside useEffect:
         const handleClick = (event: MouseEvent) => {
