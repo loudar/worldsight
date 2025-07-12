@@ -147,6 +147,9 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
                         })
                         .catch(error => {
                             console.error("Error fetching location data:", error);
+                            if (setLocationInfo) {
+                                setLocationInfo({});
+                            }
                             if (setLoading) {
                                 setLoading(false);
                             }

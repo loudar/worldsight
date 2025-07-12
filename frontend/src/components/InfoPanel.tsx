@@ -27,6 +27,17 @@ const InfoPanel: React.FC<InfoPanelProps> = ({loading, locationInfo}) => {
                         )
                     })}
                 </div>
+                <div className="flex-v spaced">
+                    {(locationInfo.data?.historicData ?? []).map((entry, index) => {
+                        return (
+                            <article key={index}>
+                                <h2>{entry.title}</h2>
+                                <span>{entry.extract}</span>
+                                <span>{entry.url}</span>
+                            </article>
+                        )
+                    })}
+                </div>
             </div>
         }</div>
     );

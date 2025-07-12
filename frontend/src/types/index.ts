@@ -6,11 +6,6 @@ export interface EarthProps {
     setLocationInfo?: (value: (((prevState: LocationInfo) => LocationInfo) | LocationInfo)) => void,
 }
 
-export interface ControlsProps {
-    dataLayer: string;
-    onLayerChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-}
-
 export interface InfoPanelProps {
     loading?: boolean,
     locationInfo?: LocationInfo,

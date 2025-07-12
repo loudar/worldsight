@@ -1,8 +1,10 @@
 import {Request, Response} from 'express';
 import {OSMGeocoder, OSMReverseGeocodeResponse} from "../OSMGeocoder";
 import {NewsService} from "../services/NewsService";
-import {HistoricDataService} from "../services/HistoricDataService";
 import {LocationResponse} from "../types/responses";
+import {WikipediaService} from "../services/WikipediaService";
+import {HistoricData} from "../types/HistoricData";
+import {NewsArticle} from "../types/NewsArticle";
 
 function getSearchName(geocode: OSMReverseGeocodeResponse) {
     return `${geocode.address.city}, ${geocode.address.country}`;
@@ -22,20 +24,26 @@ export class DataController {
             // Get location information
             const geocoder = new OSMGeocoder();
             const geocode = await geocoder.reverseGeocode({lat, lon});
-            if (!geocode) {
+            if (!geocode || !geocode.address) {
                 res.status(400).json({error: 'Invalid coordinates. Please provide valid coordinates.'});
                 return;
             }
 
             const locationName = getSearchName(geocode);
-
-            // Get news about the location
+/*
             const newsService = new NewsService();
-            const news = await newsService.getNewsByLocation(locationName);
+            const news = await newsService.getNewsByLocation(locationName);*/
+            const news: NewsArticle[] = [];
 
-            // Get historic data about the location
-            const historicDataService = new HistoricDataService();
-            const historicData = await historicDataService.getHistoricData(locationName);
+            const events = await WikipediaService.getEventsByLocation(lat, lon);
+            console.log(events);
+            const historicData = events.map(e => {
+                return <HistoricData>{
+                    title: e.title,
+                    extract: e.primary,
+                    url: e.type
+                }
+            });
 
             const response: LocationResponse = {
                 location: {

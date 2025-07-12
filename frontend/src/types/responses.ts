@@ -23,5 +23,5 @@ export interface LocationResponse {
     };
   };
   news: NewsArticle[];
-  historicData: HistoricData | null;
+  historicData: HistoricData[] | null;
 }

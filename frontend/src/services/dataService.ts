@@ -5,7 +5,7 @@ import {LocationResponse} from "../types/responses";
  * Climate data service class
  */
 export class DataService {
-    private static apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    private static apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5757/api';
 
     /**
      * Get climate data for specific coordinates
