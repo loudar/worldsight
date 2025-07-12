@@ -133,12 +133,11 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading}) =
                     }
 
                     DataService.getDataByLatLon(lat, lng)
-                        .then(locationData => {
+                        .then(data => {
                             if (setLocationInfo) {
                                 setLocationInfo({
                                     position: {lat, lng},
-                                    name: `${locationData}`,
-                                    news: ["test news", "yeah man"]
+                                    data
                                 });
                             }
 
@@ -148,11 +147,6 @@ const Earth: React.FC<EarthProps> = ({dataLayer, setLocationInfo, setLoading}) =
                         })
                         .catch(error => {
                             console.error("Error fetching location data:", error);
-                            if (setLocationInfo) {
-                                setLocationInfo({
-                                    name: `Error loading data for coordinates: ${lat.toFixed(2)}°, ${lng.toFixed(2)}°`
-                                });
-                            }
                             if (setLoading) {
                                 setLoading(false);
                             }

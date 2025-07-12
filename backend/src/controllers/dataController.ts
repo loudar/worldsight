@@ -1,11 +1,9 @@
 import {Request, Response} from 'express';
-import {db} from '../db';
-import {ClimateData, LocationDetails} from '../types';
 import {OSMGeocoder} from "../OSMGeocoder";
+import {NewsService} from "../services/NewsService";
+import {HistoricDataService} from "../services/HistoricDataService";
+import {LocationResponse} from "../types/responses";
 
-/**
- * Climate data controller class
- */
 export class DataController {
     public static async getDataByLatLon(req: Request, res: Response) {
         const lat = parseFloat(req.query.lat as string);
@@ -16,12 +14,45 @@ export class DataController {
             return;
         }
 
-        const geocoder = new OSMGeocoder();
-        const geocode = await geocoder.reverseGeocode({lat, lon});
-        if (!geocode) {
-            res.status(400).json({error: 'Invalid coordinates. Please provide valid coordinates.'});
-        }
+        try {
+            // Get location information
+            const geocoder = new OSMGeocoder();
+            const geocode = await geocoder.reverseGeocode({lat, lon});
+            if (!geocode) {
+                res.status(400).json({error: 'Invalid coordinates. Please provide valid coordinates.'});
+                return;
+            }
 
-        res.send(geocode.display_name);
+            const locationName = geocode.display_name;
+
+            // Get news about the location
+            const newsService = new NewsService();
+            const news = await newsService.getNewsByLocation(locationName);
+
+            // Get historic data about the location
+            const historicDataService = new HistoricDataService();
+            const historicData = await historicDataService.getHistoricData(locationName);
+
+            const response: LocationResponse = {
+                location: {
+                    name: geocode.display_name,
+                    coordinates: {
+                        lat: geocode.lat,
+                        lon: geocode.lon
+                    },
+                    address: geocode.address
+                },
+                news: news || [],
+                historicData: historicData || null
+            };
+
+            res.json(response);
+        } catch (error) {
+            console.error('Error fetching location data:', error);
+            res.status(500).json({
+                error: 'Failed to fetch location data',
+                message: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
     }
 }

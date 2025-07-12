@@ -1,4 +1,5 @@
 import React from "react";
+import {LocationResponse} from "./responses";
 
 export interface EarthProps {
     dataLayer: string,
@@ -21,6 +22,5 @@ export interface LocationInfo {
         lat: number;
         lng: number;
     },
-    name?: string,
-    news?: string[],
+    data?: LocationResponse
 }

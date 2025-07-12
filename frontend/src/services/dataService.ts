@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {LocationResponse} from "../types/responses";
 
 /**
  * Climate data service class
@@ -9,7 +10,7 @@ export class DataService {
     /**
      * Get climate data for specific coordinates
      */
-    public static async getDataByLatLon(lat: number, lon: number): Promise<string> {
+    public static async getDataByLatLon(lat: number, lon: number): Promise<LocationResponse> {
         try {
             const response = await axios.get(`${this.apiUrl}/data?lat=${lat}&lon=${lon}`);
             return response.data;
