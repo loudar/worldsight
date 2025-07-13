@@ -31,7 +31,7 @@ export function clickHandler(mouseRef: React.RefObject<Vector2>, raycasterRef: R
                 const position = intersection.point;
 
                 scene.remove(dot);
-                const newScale = .02 * Math.pow((controls.getDistance() / 3), 2.5);
+                const newScale = .02 * Math.pow((controls.getDistance() / 3), 3);
                 dot = createDot(newScale);
                 dot.position.copy(position);
                 scene.add(dot);

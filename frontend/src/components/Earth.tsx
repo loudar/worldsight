@@ -39,7 +39,7 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
             antialias: true,
         });
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.0001, 1000);
         camera.position.z = 3;
 
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -50,11 +50,11 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
 
         const myMap = new SlippyMapGlobe(1, {
             tileUrl: (x, y, z) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
+            maxLevel: 20
         });
-        //earthRef.current = myMap;
         scene.add(myMap);
 
-        const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+        const earthGeometry = new THREE.SphereGeometry(1, 256, 256);
         const earthMesh = new THREE.Mesh(earthGeometry, new MeshBasicMaterial({
             transparent: true,
             opacity: 0
@@ -67,7 +67,8 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
                 x: 0, y: 0, z: 0
             });
             controls.rotateSpeed = Math.pow((camDistToCenter / 3), 4);
-            console.log(camDistToCenter, controls.panSpeed);
+            controls.zoomSpeed = Math.pow((camDistToCenter / 3), 3);
+            console.log(controls.zoomSpeed);
             myMap.updatePov(camera);
         });
         myMap.updatePov(camera);
