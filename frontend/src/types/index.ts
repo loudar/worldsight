@@ -1,4 +1,3 @@
-import React from "react";
 import {LocationResponse} from "./responses";
 
 export interface EarthProps {

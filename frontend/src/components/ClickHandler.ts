@@ -52,20 +52,17 @@ export function clickHandler(mouseRef: React.RefObject<Vector2>, raycasterRef: R
                                 data
                             });
                         }
-
-                        if (setLoading) {
-                            setLoading(false);
-                        }
                     })
                     .catch(error => {
                         console.error("Error fetching location data:", error);
                         if (setLocationInfo) {
                             setLocationInfo({});
                         }
-                        if (setLoading) {
-                            setLoading(false);
-                        }
-                    });
+                    }).finally(() => {
+                    if (setLoading) {
+                        setLoading(false);
+                    }
+                });
             }
         }
     };

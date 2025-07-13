@@ -1,6 +1,5 @@
 import {Request, Response} from 'express';
 import {OSMGeocoder, OSMReverseGeocodeResponse} from "../OSMGeocoder";
-import {NewsService} from "../services/NewsService";
 import {LocationResponse} from "../types/responses";
 import {WikipediaService} from "../services/WikipediaService";
 import {HistoricData} from "../types/HistoricData";

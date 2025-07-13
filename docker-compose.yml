@@ -1,0 +1,19 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+      no_cache: true
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+      no_cache: true
+    env_file: ./backend/.env
+    ports:
+      - "5757:5757"

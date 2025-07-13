@@ -29,10 +29,6 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
             return;
         }
 
-        if (setLoading) {
-            setLoading(true);
-        }
-
         const scene = new THREE.Scene();
         sceneRef.current = scene;
         const renderer = new THREE.WebGLRenderer({
@@ -68,7 +64,6 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
             });
             controls.rotateSpeed = Math.pow((camDistToCenter / 3), 4);
             controls.zoomSpeed = Math.pow((camDistToCenter / 3), 3);
-            console.log(controls.zoomSpeed);
             myMap.updatePov(camera);
         });
         myMap.updatePov(camera);
