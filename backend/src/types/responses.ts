@@ -1,5 +1,6 @@
 import {HistoricData} from "./HistoricData";
 import {NewsArticle} from "./NewsArticle";
+import {WeatherResponse} from "./WeatherResponse";
 
 export interface LocationResponse {
     location: {
@@ -24,4 +25,5 @@ export interface LocationResponse {
     };
     news: NewsArticle[];
     historicData: HistoricData[] | null;
+    weather: WeatherResponse | null;
 }

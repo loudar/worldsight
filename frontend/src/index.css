@@ -1,5 +1,9 @@
+@import "tailwindcss";
+
 :root {
-    --radius: 5px;
+    --radius: 10px;
+    --border: 1px solid rgba(255, 255, 255, .2);
+    --bg: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.05) 100%);
 }
 
 body {
@@ -22,15 +26,26 @@ a {
     color: #0487f4;
 }
 
+a:hover {
+    text-decoration: underline;
+}
+
+.weather-card {
+    border: var(--border);
+    border-radius: var(--radius);
+    padding: 1em;
+    background: var(--bg);
+}
+
 .info-panel {
-    background-color: rgba(0, 0, 0, 0.2);
+    background: var(--bg);
     padding: 15px;
     color: white;
     width: 50dvw;
     height: 100%;
     overflow-y: auto;
     backdrop-filter: blur(16px);
-    border-right: 2px solid rgba(255, 255, 255, .5);
+    border-right: var(--border);
 }
 
 .flex, .flex-v {
@@ -58,11 +73,12 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0;
 }
 
-article {
+.article {
     padding: 10px;
     backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg);
     border-radius: var(--radius);
+    border: var(--border);
 }
 
 p {
@@ -71,10 +87,17 @@ p {
 
 h1 {
     font-size: 1.5rem;
+    background: var(--bg);
+    padding: .2em .5em;
+    border-radius: var(--radius);
+    border: var(--border);
 }
 
 h2 {
     font-size: 1.1rem;
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .canvas-container {

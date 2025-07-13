@@ -25,3 +25,10 @@
 ## Seeing location data
 
 `Right click` to show info
+
+## APIs
+
+| Env var         | Where to get                             |
+|-----------------|------------------------------------------|
+| NEWS_API_KEY    | https://newsapi.org/                     |
+| WEATHER_API_KEY | https://home.openweathermap.org/api_keys |

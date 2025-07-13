@@ -2,13 +2,16 @@ import {Request, Response} from 'express';
 import {OSMGeocoder, OSMReverseGeocodeResponse} from "../OSMGeocoder";
 import {LocationResponse} from "../types/responses";
 import {WikipediaService} from "../services/WikipediaService";
-import {HistoricData} from "../types/HistoricData";
-import {NewsArticle} from "../types/NewsArticle";
 import {NewsService} from "../services/NewsService";
+import {WeatherService} from "../services/WeatherService";
 
 function getSearchName(geocode: OSMReverseGeocodeResponse) {
     return `${geocode.address.city}, ${geocode.address.country}`;
 }
+
+const geocoder = new OSMGeocoder();
+const newsService = new NewsService();
+const weatherService = new WeatherService();
 
 export class DataController {
     public static async getDataByLatLon(req: Request, res: Response) {
@@ -21,8 +24,6 @@ export class DataController {
         }
 
         try {
-            // Get location information
-            const geocoder = new OSMGeocoder();
             const geocode = await geocoder.reverseGeocode({lat, lon});
             if (!geocode || !geocode.address) {
                 res.status(400).json({error: 'Invalid coordinates. Please provide valid coordinates.'});
@@ -31,18 +32,13 @@ export class DataController {
 
             const locationName = getSearchName(geocode);
 
-            const newsService = new NewsService();
-            const news = await newsService.getNewsByLocation(locationName);
+            const tasks: Promise<any>[] = [
+                newsService.getNewsByLocation(locationName),
+                WikipediaService.getEventsByLocation(lat, lon),
+                weatherService.getWeather(lat, lon),
+            ];
 
-            const events = await WikipediaService.getEventsByLocation(lat, lon);
-            console.log(events);
-            const historicData = events.map(e => {
-                return <HistoricData>{
-                    title: e.title,
-                    extract: e.type,
-                    url: `https://en.wikipedia.org/?curid=${e.pageid}`
-                }
-            });
+            const values = await Promise.all(tasks);
 
             const response: LocationResponse = {
                 location: {
@@ -53,8 +49,9 @@ export class DataController {
                     },
                     address: geocode.address
                 },
-                news: news || [],
-                historicData: historicData || null
+                news: values[0] || [],
+                historicData: values[1] || null,
+                weather: values[2] || null
             };
 
             res.json(response);
