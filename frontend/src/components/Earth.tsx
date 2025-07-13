@@ -38,7 +38,7 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
         const renderer = new THREE.WebGLRenderer({
             antialias: true,
         });
-        //renderer.capabilities.maxTextureSize = 16384; // depends on system, maybe threejs is smart enough to figure it out
+        console.log(`texture size: ${renderer.capabilities.maxTextureSize}`);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
         camera.position.z = 3;
