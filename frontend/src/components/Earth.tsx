@@ -6,6 +6,7 @@ import {loadTexture} from "../textureLoader";
 import {getOrbitControls} from "./GetOrbitControls";
 import {DataService} from "../services/dataService";
 import {positionToLatLng} from "./PositionToLatLng";
+import {VertexLODManager} from "./VertexLODManager";
 
 const createDot = (size: number): THREE.Mesh => {
     const geometry = new SphereGeometry(size, 32, 32);
@@ -26,9 +27,10 @@ let added = false;
 const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
     const mountRef = useRef<HTMLDivElement>(null);
     const sceneRef = useRef<THREE.Scene | null>(null);
-    const earthRef = useRef<THREE.Object3D | null>(null);
+    const earthRef = useRef<THREE.Mesh | null>(null);
     const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
     const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
+    const lodManagerRef = useRef<VertexLODManager | null>(null);
 
     useEffect(() => {
         if (!mountRef.current) {
@@ -53,15 +55,12 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
 
         const controls = getOrbitControls(camera, renderer);
 
-        const earthLOD = new THREE.LOD();
-        earthRef.current = earthLOD;
-
         Promise.all([
             loadTexture(`${window.location.origin}/8081_earthmap10k.jpg`),
             loadTexture('https://unpkg.com/three-globe@2.24.10/example/img/earth-topology.png'),
             loadTexture('https://unpkg.com/three-globe@2.24.10/example/img/earth-water.png')
         ]).then(([mapTexture, bumpTexture, specularTexture]) => {
-            const lowResMaterial = new THREE.MeshPhongMaterial({
+            const earthMaterial = new THREE.MeshPhongMaterial({
                 map: mapTexture || undefined,
                 bumpMap: bumpTexture || undefined,
                 specularMap: specularTexture || undefined,
@@ -70,34 +69,32 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
                 shininess: 5
             });
 
-            // Create different levels of detail
-            // High detail (close up)
-            const highDetailGeometry = new THREE.SphereGeometry(1, 128, 128);
-            const highDetailEarth = new THREE.Mesh(highDetailGeometry, lowResMaterial);
+            // Create a single Earth mesh with medium detail
+            const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+            const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+            earthRef.current = earthMesh;
+            scene.add(earthMesh);
 
-            // Medium detail (medium distance)
-            const mediumDetailGeometry = new THREE.SphereGeometry(1, 64, 64);
-            const mediumDetailEarth = new THREE.Mesh(mediumDetailGeometry, lowResMaterial);
+            // Initialize the vertex-based LOD manager
+            const lodManager = new VertexLODManager(scene, camera, controls, earthMesh);
+            lodManagerRef.current = lodManager;
 
-            // Low detail (far away)
-            const lowDetailGeometry = new THREE.SphereGeometry(1, 32, 32);
-            const lowDetailEarth = new THREE.Mesh(lowDetailGeometry, lowResMaterial);
+            // Initialize the LOD manager
+            lodManager.initialize().then(() => {
+                if (setLoading) {
+                    setLoading(false);
+                }
+            });
 
-            // Add levels to LOD object with distance thresholds
-            earthLOD.addLevel(highDetailEarth, 0);    // Use high detail when close
-            earthLOD.addLevel(mediumDetailEarth, 5);  // Use medium detail at medium distance
-            earthLOD.addLevel(lowDetailEarth, 10);    // Use low detail when far away
-
-            scene.add(earthLOD);
             addLights(scene);
-
-            if (setLoading) {
-                setLoading(false);
-            }
 
             const animate = () => {
                 requestAnimationFrame(animate);
-                //earthLOD.rotation.y += 0.001;
+
+                if (lodManagerRef.current) {
+                    lodManagerRef.current.update();
+                }
+
                 controls.update();
                 renderer.render(scene, camera);
             };
@@ -172,6 +169,11 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
         return () => {
             console.log("cleanup");
             window.removeEventListener('resize', handleResize);
+
+            if (lodManagerRef.current) {
+                lodManagerRef.current.dispose();
+                lodManagerRef.current = null;
+            }
 
             if (mountRef.current) {
                 mountRef.current.removeChild(renderer.domElement);
