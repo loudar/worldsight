@@ -14,40 +14,8 @@ body {
     color: #fff;
 }
 
-code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-#root {
-    width: 100vw;
-    height: 100vh;
-}
-
-.loading {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    font-size: 24px;
-    z-index: 1000;
-}
-
-.controls {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 100;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 15px;
-    border-radius: 5px;
-    color: white;
+* {
+    box-sizing: border-box;
 }
 
 a {
@@ -55,19 +23,14 @@ a {
 }
 
 .info-panel {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    z-index: 100;
     background-color: rgba(0, 0, 0, 0.2);
     padding: 15px;
-    border-radius: 10px;
     color: white;
-    max-width: 30%;
-    max-height: 80dvh;
+    width: 50dvw;
+    height: 100%;
     overflow-y: auto;
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, .5);
+    border-right: 2px solid rgba(255, 255, 255, .5);
 }
 
 .flex, .flex-v {
@@ -98,7 +61,7 @@ h1, h2, h3, h4, h5, h6 {
 article {
     padding: 10px;
     backdrop-filter: blur(10px);
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: var(--radius);
 }
 
@@ -112,4 +75,9 @@ h1 {
 
 h2 {
     font-size: 1.1rem;
+}
+
+.canvas-container {
+    height: 100%;
+    width: 100%;
 }

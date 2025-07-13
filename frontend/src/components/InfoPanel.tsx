@@ -26,7 +26,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({loading, locationInfo, setTileProv
             </div>
             </div>
             {
-                loading ? (<p>Loading...</p>) : <div>
+                loading ? (<p>Loading...</p>) : <div className="flex-v spaced">
                     <h1>{locationInfo.data?.location.name}</h1>
                     <div className="flex-v spaced">
                         {(locationInfo.data?.news ?? []).map((article, index) => {

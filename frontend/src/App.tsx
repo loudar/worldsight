@@ -13,7 +13,7 @@ const App: React.FC = () => {
     const [tileProvider, setTileProvider] = useState<string>(localStorage.getItem("tileProvider") ?? "google");
 
     return (
-        <div className="App">
+        <div className="App flex">
             <InfoPanel
                 loading={loading}
                 locationInfo={locationInfo}
@@ -21,11 +21,13 @@ const App: React.FC = () => {
                 tileProvider={tileProvider}
             />
 
-            <Earth
-                setLoading={setLoading}
-                setLocationInfo={setLocationInfo}
-                tileProvider={tileProvider}
-            />
+            <div className="globe-container">
+                <Earth
+                    setLoading={setLoading}
+                    setLocationInfo={setLocationInfo}
+                    tileProvider={tileProvider}
+                />
+            </div>
         </div>
     );
 };

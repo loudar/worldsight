@@ -16,10 +16,10 @@ export const createDot = (size: number): THREE.Mesh => {
     return new Mesh(geometry, material);
 };
 
-export function clickHandler(mouseRef: React.RefObject<Vector2>, raycasterRef: React.RefObject<Raycaster>, camera: PerspectiveCamera, earthRef: React.RefObject<Object3D | null>, scene: Scene, dot: Mesh, controls: OrbitControls, setLoading: undefined | ((value: (((prevState: boolean) => boolean) | boolean)) => void), setLocationInfo: ((value: (((prevState: LocationInfo) => LocationInfo) | LocationInfo)) => void) | undefined) {
+export function clickHandler(ref: HTMLDivElement, mouseRef: React.RefObject<Vector2>, raycasterRef: React.RefObject<Raycaster>, camera: PerspectiveCamera, earthRef: React.RefObject<Object3D | null>, scene: Scene, dot: Mesh, controls: OrbitControls, setLoading: undefined | ((value: (((prevState: boolean) => boolean) | boolean)) => void), setLocationInfo: ((value: (((prevState: LocationInfo) => LocationInfo) | LocationInfo)) => void) | undefined) {
     return (event: MouseEvent) => {
-        mouseRef.current.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouseRef.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        mouseRef.current.x = ((event.clientX - ref.offsetLeft) / ref.clientWidth) * 2 - 1;
+        mouseRef.current.y = -((event.clientY - ref.offsetTop) / ref.clientHeight) * 2 + 1;
 
         raycasterRef.current.setFromCamera(mouseRef.current, camera);
 

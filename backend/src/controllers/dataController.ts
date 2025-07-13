@@ -4,6 +4,7 @@ import {LocationResponse} from "../types/responses";
 import {WikipediaService} from "../services/WikipediaService";
 import {HistoricData} from "../types/HistoricData";
 import {NewsArticle} from "../types/NewsArticle";
+import {NewsService} from "../services/NewsService";
 
 function getSearchName(geocode: OSMReverseGeocodeResponse) {
     return `${geocode.address.city}, ${geocode.address.country}`;
@@ -29,10 +30,9 @@ export class DataController {
             }
 
             const locationName = getSearchName(geocode);
-/*
+
             const newsService = new NewsService();
-            const news = await newsService.getNewsByLocation(locationName);*/
-            const news: NewsArticle[] = [];
+            const news = await newsService.getNewsByLocation(locationName);
 
             const events = await WikipediaService.getEventsByLocation(lat, lon);
             console.log(events);

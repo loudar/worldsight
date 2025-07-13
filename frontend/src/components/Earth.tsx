@@ -40,12 +40,13 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading, tileProvider}
             antialias: true,
         });
 
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.0001, 1000);
+        const ref = mountRef.current!;
+        const camera = new THREE.PerspectiveCamera(60, ref.clientWidth / ref.clientHeight, 0.0001, 1000);
         camera.position.z = 3;
 
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(ref.clientWidth, ref.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
-        mountRef.current.appendChild(renderer.domElement);
+        ref.appendChild(renderer.domElement);
 
         const controls = getOrbitControls(camera, renderer);
 
@@ -85,33 +86,33 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading, tileProvider}
         let dot = createDot(0);
         scene.add(dot);
 
-        const handleClick = clickHandler(mouseRef, raycasterRef, camera, earthRef, scene, dot, controls, setLoading, setLocationInfo);
+        const handleClick = clickHandler(ref, mouseRef, raycasterRef, camera, earthRef, scene, dot, controls, setLoading, setLocationInfo);
 
         const handleResize = () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.aspect = ref.clientWidth / ref.clientHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(ref.clientWidth, ref.clientHeight);
         };
         window.addEventListener('resize', handleResize);
-        if (mountRef.current && !added) {
+        if (ref && !added) {
             added = true;
-            mountRef.current.addEventListener('contextmenu', handleClick);
+            ref.addEventListener('contextmenu', handleClick);
         }
 
         return () => {
             console.log("cleanup");
             window.removeEventListener('resize', handleResize);
 
-            if (mountRef.current) {
-                mountRef.current.removeChild(renderer.domElement);
-                mountRef.current.removeEventListener('contextmenu', handleClick);
+            if (ref) {
+                ref.removeChild(renderer.domElement);
+                ref.removeEventListener('contextmenu', handleClick);
                 added = false;
             }
             renderer.dispose();
         };
     }, [setLoading, setLocationInfo, tileProvider]);
 
-    return <div ref={mountRef} className="globe-container"/>;
+    return <div ref={mountRef} className="canvas-container"/>;
 };
 
 export default Earth;
