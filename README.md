@@ -21,3 +21,7 @@
    ```
    http://localhost:3000
    ```
+
+## Seeing location data
+
+`Right click` to show info
