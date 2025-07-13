@@ -12,10 +12,10 @@ const InfoPanel: React.FC<InfoPanelProps> = ({loading, locationInfo, setTileProv
     return (
         <div className="info-panel flex-v spaced">
             <div>
-                <select name="tileProvider" id="tileProvider" onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                <select name="tileProvider" id="tileProvider" value={tileProvider} onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                     if (setTileProvider) {
                         localStorage.setItem("tileProvider", e.target.value);
-                        setTileProvider(e.target.value);
+                        window.location.reload();
                     }
                 }}>
                     <option value="google">Google</option>
