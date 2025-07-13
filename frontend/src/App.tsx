@@ -10,17 +10,21 @@ import {LocationInfo} from "./types";
 const App: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [locationInfo, setLocationInfo] = useState<LocationInfo>({});
+    const [tileProvider, setTileProvider] = useState<string>(localStorage.getItem("tileProvider") ?? "google");
 
     return (
         <div className="App">
             <InfoPanel
                 loading={loading}
                 locationInfo={locationInfo}
+                setTileProvider={setTileProvider}
+                tileProvider={tileProvider}
             />
 
             <Earth
                 setLoading={setLoading}
                 setLocationInfo={setLocationInfo}
+                tileProvider={tileProvider}
             />
         </div>
     );

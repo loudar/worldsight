@@ -13,10 +13,15 @@ function addLights(scene: Scene) {
 
 let added = false;
 
+const tileFunction: Record<string, (x: number, y: number, z: number) => string> = {
+    "google": (x, y, z) => `https://mt1.google.com/vt/lyrs=y&x=${x}&y=${y}&z=${z}`,
+    "osm": (x, y, z) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
+}
+
 /**
  * Earth component for 3D globe visualization
  */
-const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
+const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading, tileProvider}) => {
     const mountRef = useRef<HTMLDivElement>(null);
     const sceneRef = useRef<THREE.Scene | null>(null);
     const earthRef = useRef<THREE.Object3D | null>(null);
@@ -45,7 +50,7 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
         const controls = getOrbitControls(camera, renderer);
 
         const myMap = new SlippyMapGlobe(1, {
-            tileUrl: (x, y, z) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
+            tileUrl: tileFunction[tileProvider ?? "google"],
             maxLevel: 20
         });
         scene.add(myMap);
@@ -104,7 +109,7 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
             }
             renderer.dispose();
         };
-    }, [setLoading, setLocationInfo]);
+    }, [setLoading, setLocationInfo, tileProvider]);
 
     return <div ref={mountRef} className="globe-container"/>;
 };
