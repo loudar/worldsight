@@ -11,7 +11,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({loading, locationInfo, setTileProv
 
     return (
         <div className="info-panel flex-v spaced">
-            <div>
+            <div className="flex spread">
                 <select name="tileProvider" id="tileProvider" value={tileProvider} onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                     if (setTileProvider) {
                         localStorage.setItem("tileProvider", e.target.value);
@@ -20,15 +20,14 @@ const InfoPanel: React.FC<InfoPanelProps> = ({loading, locationInfo, setTileProv
                 }}>
                     <option value="google">Google</option>
                     <option value="osm">OpenStreetMap</option>
-                </select>
+                </select><div className="flex spaced mono">
+                <p>LAT {locationInfo.position?.lat.toFixed(2)}</p>
+                <p>LON {locationInfo.position?.lng.toFixed(2)}</p>
+            </div>
             </div>
             {
                 loading ? (<p>Loading...</p>) : <div>
                     <h1>{locationInfo.data?.location.name}</h1>
-                    <div className="flex spaced mono">
-                        <p>LAT {locationInfo.position?.lat.toFixed(2)}</p>
-                        <p>LON {locationInfo.position?.lng.toFixed(2)}</p>
-                    </div>
                     <div className="flex-v spaced">
                         {(locationInfo.data?.news ?? []).map((article, index) => {
                             return (
