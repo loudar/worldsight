@@ -31,8 +31,10 @@ const InfoPanel: React.FC<InfoPanelProps> = ({loading, locationInfo}) => {
                     {(locationInfo.data?.historicData ?? []).map((entry, index) => {
                         return (
                             <article key={index}>
-                                <h2>{entry.title}</h2>
-                                <span>{entry.extract}</span>
+                                <div className="flex spread">
+                                    <h2>{entry.title}</h2>
+                                    <p>{entry.extract}</p>
+                                </div>
                                 <a href={entry.url} target="_blank">{entry.url}</a>
                             </article>
                         )

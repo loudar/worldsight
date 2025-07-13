@@ -7,8 +7,12 @@ import {DataService} from "../services/dataService";
 import * as THREE from "three";
 
 export const createDot = (size: number): THREE.Mesh => {
-    const geometry = new SphereGeometry(size, 32, 32);
-    const material = new MeshBasicMaterial({color: 0xff0000});
+    const geometry = new SphereGeometry(size, 16, 16);
+    const material = new MeshBasicMaterial({
+        color: 0xff0000,
+        transparent: true,
+        opacity: .5,
+    });
     return new Mesh(geometry, material);
 };
 
@@ -25,10 +29,9 @@ export function clickHandler(mouseRef: React.RefObject<Vector2>, raycasterRef: R
             if (intersects.length > 0) {
                 const intersection = intersects[0];
                 const position = intersection.point;
-                console.log(position);
 
                 scene.remove(dot);
-                const newScale = 0.005 * (controls.getDistance() / 3);
+                const newScale = .02 * Math.pow((controls.getDistance() / 3), 2.5);
                 dot = createDot(newScale);
                 dot.position.copy(position);
                 scene.add(dot);

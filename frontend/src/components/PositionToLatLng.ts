@@ -24,7 +24,7 @@ export function positionToLatLng(
         // Create a matrix that represents the inverse of the earth's rotation
         const inverseRotationMatrix = new THREE.Matrix4().makeRotationFromEuler(
             new THREE.Euler(-earthLOD.rotation.x, -earthLOD.rotation.y, -earthLOD.rotation.z, earthLOD.rotation.order)
-        ).makeRotationY(Math.PI * 1.5);
+        );
 
         // Apply the inverse rotation to the position
         adjustedPosition.applyMatrix4(inverseRotationMatrix);

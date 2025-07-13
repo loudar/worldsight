@@ -1,6 +1,6 @@
 import React, {useEffect, useRef} from 'react';
 import * as THREE from 'three';
-import {Scene} from 'three';
+import {MeshBasicMaterial, Scene} from 'three';
 import {EarthProps} from '../types';
 import {getOrbitControls} from "./GetOrbitControls";
 import {clickHandler, createDot} from "./ClickHandler";
@@ -38,7 +38,6 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
         const renderer = new THREE.WebGLRenderer({
             antialias: true,
         });
-        console.log(`texture size: ${renderer.capabilities.maxTextureSize}`);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
         camera.position.z = 3;
@@ -52,14 +51,27 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
         const myMap = new SlippyMapGlobe(1, {
             tileUrl: (x, y, z) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
         });
-        earthRef.current = myMap;
+        //earthRef.current = myMap;
         scene.add(myMap);
 
+        const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+        const earthMesh = new THREE.Mesh(earthGeometry, new MeshBasicMaterial({
+            transparent: true,
+            opacity: 0
+        }));
+        earthRef.current = earthMesh;
+        scene.add(earthMesh);
+
         controls.addEventListener('change', () => {
-            controls.panSpeed = Math.pow(((camera.position.z - 1) / 2), 2);
-            console.log(controls.panSpeed);
+            const camDistToCenter = camera.position.distanceTo({
+                x: 0, y: 0, z: 0
+            });
+            controls.rotateSpeed = Math.pow((camDistToCenter / 3), 4);
+            console.log(camDistToCenter, controls.panSpeed);
             myMap.updatePov(camera);
         });
+        myMap.updatePov(camera);
+
         addLights(scene);
         const animate = () => {
             requestAnimationFrame(animate);
@@ -82,7 +94,7 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
         window.addEventListener('resize', handleResize);
         if (mountRef.current && !added) {
             added = true;
-            mountRef.current.addEventListener('click', handleClick);
+            mountRef.current.addEventListener('contextmenu', handleClick);
         }
 
         return () => {
@@ -91,7 +103,7 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
 
             if (mountRef.current) {
                 mountRef.current.removeChild(renderer.domElement);
-                mountRef.current.removeEventListener('click', handleClick);
+                mountRef.current.removeEventListener('contextmenu', handleClick);
                 added = false;
             }
             renderer.dispose();
