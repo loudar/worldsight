@@ -1,5 +1,5 @@
 import React from "react";
-import {Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2} from "three";
+import {Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {LocationInfo} from "../types";
 import {positionToLatLng} from "./PositionToLatLng";
@@ -12,7 +12,7 @@ export const createDot = (size: number): THREE.Mesh => {
     return new Mesh(geometry, material);
 };
 
-export function clickHandler(mouseRef: React.RefObject<Vector2>, raycasterRef: React.RefObject<Raycaster>, camera: PerspectiveCamera, earthRef: React.RefObject<Mesh | null>, scene: Scene, dot: Mesh, controls: OrbitControls, setLoading: undefined | ((value: (((prevState: boolean) => boolean) | boolean)) => void), setLocationInfo: ((value: (((prevState: LocationInfo) => LocationInfo) | LocationInfo)) => void) | undefined) {
+export function clickHandler(mouseRef: React.RefObject<Vector2>, raycasterRef: React.RefObject<Raycaster>, camera: PerspectiveCamera, earthRef: React.RefObject<Object3D | null>, scene: Scene, dot: Mesh, controls: OrbitControls, setLoading: undefined | ((value: (((prevState: boolean) => boolean) | boolean)) => void), setLocationInfo: ((value: (((prevState: LocationInfo) => LocationInfo) | LocationInfo)) => void) | undefined) {
     return (event: MouseEvent) => {
         mouseRef.current.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouseRef.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -25,6 +25,7 @@ export function clickHandler(mouseRef: React.RefObject<Vector2>, raycasterRef: R
             if (intersects.length > 0) {
                 const intersection = intersects[0];
                 const position = intersection.point;
+                console.log(position);
 
                 scene.remove(dot);
                 const newScale = 0.005 * (controls.getDistance() / 3);

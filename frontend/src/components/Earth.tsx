@@ -2,9 +2,9 @@ import React, {useEffect, useRef} from 'react';
 import * as THREE from 'three';
 import {Scene} from 'three';
 import {EarthProps} from '../types';
-import {loadTexture} from "../textureLoader";
 import {getOrbitControls} from "./GetOrbitControls";
 import {clickHandler, createDot} from "./ClickHandler";
+import SlippyMapGlobe from 'three-slippy-map-globe';
 
 function addLights(scene: Scene) {
     const ambientLight = new THREE.AmbientLight(0xffffff);
@@ -19,7 +19,7 @@ let added = false;
 const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
     const mountRef = useRef<HTMLDivElement>(null);
     const sceneRef = useRef<THREE.Scene | null>(null);
-    const earthRef = useRef<THREE.Mesh | null>(null);
+    const earthRef = useRef<THREE.Object3D | null>(null);
     const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
     const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
 
@@ -49,36 +49,26 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
 
         const controls = getOrbitControls(camera, renderer);
 
-        Promise.all([
-            loadTexture(`${window.location.origin}/8081_earthmap10k.jpg`),
-            loadTexture('https://unpkg.com/three-globe@2.24.10/example/img/earth-topology.png'),
-            loadTexture('https://unpkg.com/three-globe@2.24.10/example/img/earth-water.png')
-        ]).then(([mapTexture, bumpTexture, specularTexture]) => {
-            const earthMaterial = new THREE.MeshPhongMaterial({
-                map: mapTexture || undefined,
-                bumpMap: bumpTexture || undefined,
-                specularMap: specularTexture || undefined,
-                bumpScale: 20,
-                specular: new THREE.Color('grey'),
-                shininess: 5,
-            });
-
-            const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
-            const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
-            earthRef.current = earthMesh;
-            scene.add(earthMesh);
-
-            addLights(scene);
-
-            const animate = () => {
-                requestAnimationFrame(animate);
-
-                controls.update();
-                renderer.render(scene, camera);
-            };
-
-            animate();
+        const myMap = new SlippyMapGlobe(1, {
+            tileUrl: (x, y, z) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
         });
+        earthRef.current = myMap;
+        scene.add(myMap);
+
+        controls.addEventListener('change', () => {
+            controls.panSpeed = Math.pow(((camera.position.z - 1) / 2), 2);
+            console.log(controls.panSpeed);
+            myMap.updatePov(camera);
+        });
+        addLights(scene);
+        const animate = () => {
+            requestAnimationFrame(animate);
+
+            controls.update();
+            renderer.render(scene, camera);
+        };
+
+        animate();
         let dot = createDot(0);
         scene.add(dot);
 
