@@ -5,7 +5,6 @@ import {EarthProps} from '../types';
 import {loadTexture} from "../textureLoader";
 import {getOrbitControls} from "./GetOrbitControls";
 import {clickHandler, createDot} from "./ClickHandler";
-import {gibsService, LODLevel} from "../services/gibsService";
 
 function addLights(scene: Scene) {
     const ambientLight = new THREE.AmbientLight(0xffffff);
@@ -23,8 +22,6 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
     const earthRef = useRef<THREE.Mesh | null>(null);
     const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
     const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
-    const currentLODRef = useRef<LODLevel | null>(null);
-    const isLoadingTextureRef = useRef<boolean>(false);
 
     useEffect(() => {
         if (!mountRef.current) {
@@ -38,7 +35,10 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
 
         const scene = new THREE.Scene();
         sceneRef.current = scene;
-        const renderer = new THREE.WebGLRenderer({antialias: true});
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+        });
+        //renderer.capabilities.maxTextureSize = 16384; // depends on system, maybe threejs is smart enough to figure it out
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
         camera.position.z = 3;
@@ -49,89 +49,36 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
 
         const controls = getOrbitControls(camera, renderer);
 
-        const initializeEarth = async () => {
-            try {
-                const [bumpTexture, specularTexture] = await Promise.all([
-                    loadTexture('https://unpkg.com/three-globe@2.24.10/example/img/earth-topology.png'),
-                    loadTexture('https://unpkg.com/three-globe@2.24.10/example/img/earth-water.png')
-                ]);
+        Promise.all([
+            loadTexture(`${window.location.origin}/8081_earthmap10k.jpg`),
+            loadTexture('https://unpkg.com/three-globe@2.24.10/example/img/earth-topology.png'),
+            loadTexture('https://unpkg.com/three-globe@2.24.10/example/img/earth-water.png')
+        ]).then(([mapTexture, bumpTexture, specularTexture]) => {
+            const earthMaterial = new THREE.MeshPhongMaterial({
+                map: mapTexture || undefined,
+                bumpMap: bumpTexture || undefined,
+                specularMap: specularTexture || undefined,
+                bumpScale: 20,
+                specular: new THREE.Color('grey'),
+                shininess: 5,
+            });
 
-                const cameraDistance = camera.position.distanceTo(new THREE.Vector3(0, 0, 0));
-                const initialLOD = gibsService.getCurrentLODLevel(cameraDistance);
-                currentLODRef.current = initialLOD;
+            const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+            const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+            earthRef.current = earthMesh;
+            scene.add(earthMesh);
 
-                const initialTexture = await gibsService.loadGlobalTexture(initialLOD);
+            addLights(scene);
 
-                const earthMaterial = new THREE.MeshPhongMaterial({
-                    map: initialTexture,
-                    bumpMap: bumpTexture || undefined,
-                    specularMap: specularTexture || undefined,
-                    bumpScale: 20,
-                    specular: new THREE.Color('grey'),
-                    shininess: 5
-                });
+            const animate = () => {
+                requestAnimationFrame(animate);
 
-                const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
-                const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
-                earthRef.current = earthMesh;
-                scene.add(earthMesh);
+                controls.update();
+                renderer.render(scene, camera);
+            };
 
-                addLights(scene);
-
-                const updateLOD = async () => {
-                    if (!earthRef.current || isLoadingTextureRef.current) return;
-
-                    const cameraDistance = camera.position.distanceTo(new THREE.Vector3(0, 0, 0));
-                    const newLOD = gibsService.getCurrentLODLevel(cameraDistance);
-
-                    if (!currentLODRef.current || 
-                        newLOD.config.layer !== currentLODRef.current.config.layer ||
-                        newLOD.matrixLevel !== currentLODRef.current.matrixLevel) {
-                        
-                        currentLODRef.current = newLOD;
-                        isLoadingTextureRef.current = true;
-
-                        try {
-                            const newTexture = await gibsService.loadGlobalTexture(newLOD);
-                            if (earthRef.current && earthRef.current.material instanceof THREE.MeshPhongMaterial) {
-                                const oldTexture = earthRef.current.material.map;
-                                earthRef.current.material.map = newTexture;
-                                earthRef.current.material.needsUpdate = true;
-                                
-                                if (oldTexture && oldTexture !== newTexture) {
-                                    oldTexture.dispose();
-                                }
-                            }
-                        } catch (error) {
-                            console.error('Failed to load new LOD texture:', error);
-                        } finally {
-                            isLoadingTextureRef.current = false;
-                        }
-                    }
-                };
-
-                const animate = () => {
-                    requestAnimationFrame(animate);
-
-                    controls.update();
-                    updateLOD();
-                    renderer.render(scene, camera);
-                };
-
-                animate();
-
-                if (setLoading) {
-                    setLoading(false);
-                }
-            } catch (error) {
-                console.error('Failed to initialize Earth:', error);
-                if (setLoading) {
-                    setLoading(false);
-                }
-            }
-        };
-
-        initializeEarth();
+            animate();
+        });
         let dot = createDot(0);
         scene.add(dot);
 
@@ -157,8 +104,6 @@ const Earth: React.FC<EarthProps> = ({setLocationInfo, setLoading}) => {
                 mountRef.current.removeEventListener('click', handleClick);
                 added = false;
             }
-            
-            gibsService.clearCache();
             renderer.dispose();
         };
     }, [setLoading, setLocationInfo]);
