@@ -12,12 +12,14 @@
    cd worldsight
    ```
 
-2. Start the application using Docker Compose:
+2. Copy the [.env.example](./backend/.env.example) to `./backend/.env` and fill in the xxx values
+
+3. Start the application using Docker Compose:
    ```
    docker-compose up -d --build
    ```
 
-3. Access the application in your browser:
+4. Access the application in your browser:
    ```
    http://localhost:3000
    ```
